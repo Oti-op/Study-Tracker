@@ -2,6 +2,8 @@ from fastapi import APIRouter, Query
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session, select
 from datetime import datetime, date
+import matplotlib
+matplotlib.use("Agg")  # use non-interactive backend for servers
 import matplotlib.pyplot as plt
 import io
 
@@ -47,16 +49,16 @@ def stude_progress_chart(
     x = [d.strftime("%Y-%m-%d") for d in dates]
     y = [totals[d] for d in dates]
 
-    plt.figure(figssize=(6, 3))
+    plt.figure(figsize=(6, 3))
     plt.plot(x, y, marker="o")
-    plt.xtricks(rotation=45)
+    plt.xticks(rotation=45)
     plt.xlabel("Dates")
     plt.ylabel("Minutes Studied")
     plt.title("Study Progress")
     plt.tight_layout()
 
     buf = io.BytesIO()
-    plt.savefig(buf, format="png")
+    plt.savefig(buf, format="png", bbox_inches="tight")
     plt.close()
     buf.seek(0)
 
