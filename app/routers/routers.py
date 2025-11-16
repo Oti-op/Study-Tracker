@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from sqlomdel import Session, select
+from sqlmodel import Session, select
 from typing import List, Optional
 from datetime import datetime
 
@@ -9,7 +9,7 @@ from app.database import engine
 
 router = APIRouter(prefix="/sessions", tags=["study sessions"])
 
-@router.post("/", response_model=sessionread, status_Code=201)
+@router.post("/", response_model=sessionread, status_code=201)
 def create_session(session: sessioncreate):
     with Session(engine) as db:
         db_session = StudySession(
