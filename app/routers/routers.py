@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from sqlmodel import Session, select
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, date
 
 from app.models import StudySession
 from app.schemas import sessioncreate, sessionread
@@ -22,19 +22,19 @@ def create_session(session: sessioncreate):
         db.refresh(db_session)
         return db_session
 @router.get("/", response_model=List[sessionread])
-def list_sessions(subject: Optional[str] = None, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
+def list_sessions(subject: Optional[str] = None, from_date: Optional[date] = None, to_date: Optional[date] = None):
     stmt = select(StudySession)
 
     if subject:
         stmt = stmt.where(StudySession.subject == subject)
-    if start_date:
-        stmt = stmt.where(StudySession.start_time >= datetime.combine(start_date, datetime.min.time()))
-    if end_date:
-        stmt = stmt.where(StudySession.start_time <= datetime.combine(end_date, datetime.max.time()))
+    if from_date:
+        stmt = stmt.where(StudySession.start_time >= datetime.combine(from_date, datetime.min.time()))
+    if to_date:
+        stmt = stmt.where(StudySession.start_time <= datetime.combine(to_date, datetime.max.time()))
 
-        with Session(engine) as db:
-            results = db.exec(stmt).all()
-            return results
+    with Session(engine) as db:
+        results = db.exec(stmt).all()
+        return results
         
 @router.get("/{subject_id}", response_model=sessionread)
 def get_session(subject_id: int):

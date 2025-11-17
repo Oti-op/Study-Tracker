@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Study Tracker</title>
 </head>
 <body>
     <h1>Study Tracker</h1>
-    <p>Log your study sessions, view them and guage your progress with a chart</p>
+    <p>Log your study sessions, view them and gauge your progress with a chart</p>
 
     <!-- log a session -->
-     <section>
+    <section>
         <h3>Enter a session</h3>
         <form id="sessionform">
             <input type="text" id="subject" name="subject" placeholder="subject (eg. math)" required><br>
@@ -22,49 +22,156 @@
                 <button id="reload" type="button">Refresh list & chart</button>
             </div>
         </form>
-     </section>
+    </section>
+
     <!-- view chart -->
-     <section>
+    <section>
         <h3>Progress chart</h3>
         <div style="grid-column: 1 / span 3; display: flex; gap: 8px; margin-top: 8px;">
-        <input type="text" placeholder="filter subject" id="filtersubject">
-        <input type="date" id="fromdate">
-        <input type="date" id="todate">
-        <button id="applyfilters">apply</button>
-        <button id="resetfilters">reset</button>
+            <input type="text" placeholder="filter subject" id="filtersubject">
+            <input type="date" id="fromdate">
+            <input type="date" id="todate">
+            <button id="applyfilters">apply</button>
+            <button id="resetfilters">reset</button>
         </div>
 
         <div id="chart">
-            <img id="chartimg" src="/app/routers/chart.py/progress.png"  alt="study progress chart">
+            <!-- router prefix in your code is /charts, so use /charts/progress.png -->
+            <img id="chartimg" src="/charts/progress.png" alt="study progress chart">
         </div>
-     </section>
+    </section>
+
     <!-- view sessions -->
-     <section>
+    <section>
         <h3>Recent sessions</h3>
         <div id="sessioncount" class="small"></div>
         <table id="sessionstable">
             <thead>
-                <tr><th>ID</th>Subject<th>Minutes</th><th>Staarted at</th></tr>
+                <tr><th>ID</th><th>Subject</th><th>Minutes</th><th>Started at</th></tr>
             </thead>
+            <tbody id="sessionstablebody"></tbody>
         </table>
-     </section>
+    </section>
 
-     <script>
-        const apiBase = ""
+    <script>
         const form = document.getElementById("sessionform");
         const subjectinput = document.getElementById("subject");
         const durationinput = document.getElementById("duration");
         const starttimeinput = document.getElementById("start_time");
-        const sessionstable = document.querySelector("#sessionstable tbody");
+        const sessionstablebody = document.getElementById("sessionstablebody");
         const sessioncount = document.getElementById("sessioncount");
         const chartimg = document.getElementById("chartimg");
         const filtersubject = document.getElementById("filtersubject");
         const fromdate = document.getElementById("fromdate");
         const todate = document.getElementById("todate");
+        const applyfilters = document.getElementById("applyfilters");
+        const resetfilters = document.getElementById("resetfilters");
+        const reloadBtn = document.getElementById("reload");
+        const clearBtn = document.getElementById("clear");
+
+        function escapeHTML(s) {
+            return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        }
 
         function chartURL() {
-            
+            const params = new URLSearchParams();
+            if (filtersubject.value.trim()) params.set("subject", filtersubject.value.trim());
+            if (fromdate.value) params.set("from_date", fromdate.value);
+            if (todate.value) params.set("to_date", todate.value);
+            params.set("_ts", Date.now());
+            const qs = params.toString();
+            return "/charts/progress.png" + (qs ? "?" + qs : "");
         }
-     </script>
+
+        async function loadsessions() {
+            try {
+                const params = new URLSearchParams();
+                if (filtersubject.value.trim()) params.set("subject", filtersubject.value.trim());
+                if (fromdate.value) params.set("from_date", fromdate.value);
+                if (todate.value) params.set("to_date", todate.value);
+
+                const qs = params.toString();
+                // call /sessions (no extra slash) + querystring
+                const res = await fetch("/sessions" + (qs ? "?" + qs : ""));
+                if (!res.ok) throw new Error("Failed to fetch sessions");
+                const data = await res.json();
+
+                sessionstablebody.innerHTML = "";
+                data.forEach(s => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `<td>${escapeHTML(s.subject_id ?? "")}</td>
+                                    <td>${escapeHTML(s.subject)}</td>
+                                    <td>${escapeHTML(s.duration)}</td>
+                                    <td>${new Date(s.start_time).toLocaleString()}</td>`;
+                    sessionstablebody.appendChild(tr);
+                });
+
+                sessioncount.textContent = `${data.length} session(s) found.`;
+            } catch (error) {
+                console.error("Error loading sessions:", error);
+                sessioncount.textContent = "Error loading sessions.";
+            }
+        }
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const subject = subjectinput.value.trim();
+            const duration = parseInt(durationinput.value, 10);
+            let start_time = starttimeinput.value;
+
+            if (!subject || !duration || !start_time) {
+                alert("Please fill in all fields correctly.");
+                return;
+            }
+
+            // datetime-local gives "YYYY-MM-DDTHH:MM" (no seconds); convert to "YYYY-MM-DDTHH:MM:SS"
+            start_time = start_time.length === 16 ? start_time + ":00" : start_time;
+
+            try {
+                const res = await fetch("/sessions/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ subject, duration, start_time }),
+                });
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(errText || "Failed to add session");
+                }
+                alert("Session added successfully!");
+                form.reset();
+                loadsessions();
+                chartimg.src = chartURL();
+            } catch (error) {
+                console.error("Error adding session:", error);
+                alert("Error adding session. See console for details.");
+            }
+        });
+
+        applyfilters.addEventListener("click", () => {
+            loadsessions();
+            chartimg.src = chartURL();
+        });
+
+        resetfilters.addEventListener("click", () => {
+            filtersubject.value = "";
+            fromdate.value = "";
+            todate.value = "";
+            loadsessions();
+            chartimg.src = chartURL();
+        });
+
+        reloadBtn.addEventListener("click", () => {
+            loadsessions();
+            chartimg.src = chartURL();
+        });
+
+        clearBtn.addEventListener("click", () => form.reset());
+
+        // initial load
+        (async () => {
+            await loadsessions();
+            chartimg.src = chartURL();
+        })();
+    </script>
 </body>
 </html>
