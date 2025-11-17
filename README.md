@@ -13,14 +13,14 @@ The Study Tracker is a simple web app that helps you log study sessions, set goa
 ### 🚀 Use It Yourself
 You can clone the repository and run it locally:
 
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-07405E?logo=sqlite&logoColor=white)
+
 ```bash
 git clone https://github.com/Oti-op/Study-Tracker
 cd REPO-NAME
 uvicorn main:app --reload
-'''
 
-![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-07405E?logo=sqlite&logoColor=white)
 
 
