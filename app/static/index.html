@@ -44,15 +44,18 @@
         #chart {
             margin-top: 20px;
         }
+        #title {
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <h1>Study Tracker</h1>
-    <p>Log your study sessions, view them and gauge your progress with a chart</p>
+    <h1 id="title">Study Tracker</h1>
+    <p id="title">Log your study sessions, view them and gauge your progress with a chart</p>
 
     <!-- log a session -->
     <section>
-        <h3>Enter a session</h3>
+        <h3 id="title">Enter a session</h3>
         <form id="sessionform">
             <input type="text" id="subject" name="subject" placeholder="subject (eg. math)" required><br>
             <input type="number" id="duration" name="duration" placeholder="duration (in minutes)" min="1" required><br>
@@ -67,7 +70,7 @@
 
     <!-- view chart -->
     <section>
-        <h3>Progress chart</h3>
+        <h3 id="title">Progress chart</h3>
         <div style="grid-column: 1 / span 3; display: flex; gap: 8px; margin-top: 8px;">
             <input type="text" placeholder="filter subject" id="filtersubject">
             <input type="date" id="fromdate">
@@ -84,7 +87,7 @@
 
     <!-- view sessions -->
     <section>
-        <h3>Recent sessions</h3>
+        <h3 id="title">Recent sessions</h3>
         <div id="sessioncount" class="small"></div>
         <table id="sessionstable">
             <thead>
