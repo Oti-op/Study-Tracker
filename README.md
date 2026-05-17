@@ -1,4 +1,4 @@
-![Study Tracker Screenshot](dashboard.png)
+![Study Tracker Screenshot](Screenshot 2026-05-17 at 17.36.06.png)
 
 ## 🧠 Study Tracker Dashboard
 
