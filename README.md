@@ -22,6 +22,7 @@ You can clone the repository and run it locally:
 git clone https://github.com/Oti-op/Study-Tracker
 cd REPO-NAME
 uvicorn main:app --reload
-
+```
+or visit at https://study-tracker-six-rosy.vercel.app/
 
 
