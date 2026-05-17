@@ -1,4 +1,4 @@
-![Study Tracker Screenshot](Screenshot1.png)
+![Study Tracker Screenshot](screenshot1.png)
 
 ## 🧠 Study Tracker Dashboard
 
