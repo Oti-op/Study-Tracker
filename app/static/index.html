@@ -5,217 +5,410 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Study Tracker</title>
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f1f5f9;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #eef2ff;
+            --danger: #ef4444;
+            --text: #1e293b;
+            --muted: #64748b;
+            --radius: 12px;
+            --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+        }
+
         body {
-            background-color: #FFA07A;
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            background: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text);
+            min-height: 100vh;
         }
-        h1, h3 {
-            color: #333;
+
+        /* ── Header ── */
+        header {
+            background: var(--primary);
+            color: #fff;
+            padding: 28px 32px 24px;
+            margin-bottom: 32px;
         }
-        form {
+        header h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -.4px; }
+        header p  { margin-top: 4px; opacity: .8; font-size: .95rem; }
+
+        /* ── Layout ── */
+        main {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 20px 48px;
+            display: grid;
+            gap: 24px;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 28px;
+        }
+        .card h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card h2 .badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: .72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 99px;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+        }
+
+        /* ── Form ── */
+        .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            max-width: 600px;
+            gap: 16px;
+        }
+        @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
 
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label { font-size: .82rem; font-weight: 600; color: var(--muted); }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        input[type="datetime-local"] {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .9rem;
+            color: var(--text);
+            background: #fff;
+            transition: border-color .15s, box-shadow .15s;
+            outline: none;
         }
-        input, button {
-            padding: 8px;
-            font-size: 1rem;
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,.12);
         }
+
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+        button {
+            padding: 9px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: .88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .15s, transform .08s;
+        }
+        button:active { transform: scale(.97); }
+
+        .btn-primary  { background: var(--primary); color: #fff; }
+        .btn-primary:hover  { background: var(--primary-hover); }
+        .btn-outline  { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
+        .btn-outline:hover  { background: var(--primary-light); }
+        .btn-ghost   { background: var(--bg); color: var(--muted); }
+        .btn-ghost:hover   { background: var(--border); }
+
+        /* ── Filters ── */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .filter-bar .field { flex: 1; min-width: 140px; }
+        .filter-bar .field:first-child { flex: 1.5; min-width: 160px; }
+        .filter-actions { display: flex; gap: 8px; align-items: flex-end; padding-bottom: 1px; }
+
+        /* ── Chart ── */
+        #chart img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        /* ── Table ── */
+        .table-meta {
+            font-size: .82rem;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            font-size: .88rem;
         }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
+        thead tr {
+            background: var(--bg);
+            border-bottom: 2px solid var(--border);
         }
         th {
-            background-color: #f4f4f4;
+            padding: 10px 14px;
+            text-align: left;
+            font-size: .78rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
         }
-        .small {
-            font-size: 0.9em;
-            color: #666;
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .1s;
         }
-        #chart {
-            margin-top: 20px;
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--primary-light); }
+        td { padding: 11px 14px; color: var(--text); }
+
+        .tag {
+            display: inline-block;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: .75rem;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 99px;
         }
-        #title {
-            text-align: center;
+
+        /* ── Toast ── */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: .88rem;
+            font-weight: 600;
+            color: #fff;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity .25s, transform .25s;
+            pointer-events: none;
+            z-index: 999;
         }
+        #toast.show { opacity: 1; transform: translateY(0); }
+        #toast.success { background: #10b981; }
+        #toast.error   { background: var(--danger); }
     </style>
 </head>
 <body>
-    <h1 id="title">Study Tracker</h1>
-    <p id="title">Log your study sessions, view them and gauge your progress with a chart</p>
 
-    <!-- log a session -->
-    <section>
-        <h3 id="title">Enter a session</h3>
+<header>
+    <h1>Study Tracker</h1>
+    <p>Log sessions, track progress, and stay on top of your studies.</p>
+</header>
+
+<main>
+
+    <!-- Log a session -->
+    <div class="card">
+        <h2>Log a session <span class="badge">New</span></h2>
         <form id="sessionform">
-            <input type="text" id="subject" name="subject" placeholder="subject (eg. math)" required><br>
-            <input type="number" id="duration" name="duration" placeholder="duration (in minutes)" min="1" required><br>
-            <input type="datetime-local" id="start_time" name="start_time" required>
-            <div style="grid-column: 1 / span 3; display: flex; gap: 8px; margin-top: 8px;">
-                <button id="add" type="submit">Add session</button>
-                <button id="clear" type="button">Clear form</button>
-                <button id="reload" type="button">Refresh list and chart</button>
+            <div class="form-grid">
+                <div class="field">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" name="subject" placeholder="e.g. Mathematics" required>
+                </div>
+                <div class="field">
+                    <label for="duration">Duration (minutes)</label>
+                    <input type="number" id="duration" name="duration" placeholder="e.g. 45" min="1" required>
+                </div>
+                <div class="field">
+                    <label for="start_time">Start time</label>
+                    <input type="datetime-local" id="start_time" name="start_time" required>
+                </div>
+            </div>
+            <div class="btn-row">
+                <button class="btn-primary" type="submit">Add session</button>
+                <button class="btn-ghost" id="clear" type="button">Clear</button>
             </div>
         </form>
-    </section>
+    </div>
 
-    <!-- view chart -->
-    <section>
-        <h3 id="title">Progress chart</h3>
-        <div style="grid-column: 1 / span 3; display: flex; gap: 8px; margin-top: 8px;">
-            <input type="text" placeholder="filter subject" id="filtersubject">
-            <input type="date" id="fromdate">
-            <input type="date" id="todate">
-            <button id="applyfilters">apply</button>
-            <button id="resetfilters">reset</button>
+    <!-- Progress chart -->
+    <div class="card">
+        <h2>Progress chart</h2>
+        <div class="filter-bar">
+            <div class="field">
+                <label for="filtersubject">Filter by subject</label>
+                <input type="text" id="filtersubject" placeholder="e.g. Mathematics">
+            </div>
+            <div class="field">
+                <label for="fromdate">From</label>
+                <input type="date" id="fromdate">
+            </div>
+            <div class="field">
+                <label for="todate">To</label>
+                <input type="date" id="todate">
+            </div>
+            <div class="filter-actions">
+                <button class="btn-primary" id="applyfilters">Apply</button>
+                <button class="btn-outline" id="resetfilters">Reset</button>
+            </div>
         </div>
-
         <div id="chart">
-            <!-- router prefix in your code is /charts, so use /charts/progress.png -->
-            <img id="chartimg" src="/charts/progress.png" alt="study progress chart">
+            <img id="chartimg" src="/charts/progress.png" alt="Study progress chart">
         </div>
-    </section>
+    </div>
 
-    <!-- view sessions -->
-    <section>
-        <h3 id="title">Recent sessions</h3>
-        <div id="sessioncount" class="small"></div>
+    <!-- Sessions table -->
+    <div class="card">
+        <h2>Recent sessions</h2>
+        <div class="table-meta" id="sessioncount"></div>
         <table id="sessionstable">
             <thead>
-                <tr><th>ID</th><th>Subject</th><th>Minutes</th><th>Started at</th></tr>
+                <tr>
+                    <th>ID</th>
+                    <th>Subject</th>
+                    <th>Minutes</th>
+                    <th>Started at</th>
+                </tr>
             </thead>
             <tbody id="sessionstablebody"></tbody>
         </table>
-    </section>
+    </div>
 
-    <script>
-        const form = document.getElementById("sessionform");
-        const subjectinput = document.getElementById("subject");
-        const durationinput = document.getElementById("duration");
-        const starttimeinput = document.getElementById("start_time");
-        const sessionstablebody = document.getElementById("sessionstablebody");
-        const sessioncount = document.getElementById("sessioncount");
-        const chartimg = document.getElementById("chartimg");
-        const filtersubject = document.getElementById("filtersubject");
-        const fromdate = document.getElementById("fromdate");
-        const todate = document.getElementById("todate");
-        const applyfilters = document.getElementById("applyfilters");
-        const resetfilters = document.getElementById("resetfilters");
-        const reloadBtn = document.getElementById("reload");
-        const clearBtn = document.getElementById("clear");
+</main>
 
-        function escapeHTML(s) {
-            return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-        }
+<div id="toast"></div>
 
-        function chartURL() {
+<script>
+    const form            = document.getElementById("sessionform");
+    const subjectinput    = document.getElementById("subject");
+    const durationinput   = document.getElementById("duration");
+    const starttimeinput  = document.getElementById("start_time");
+    const sessionstablebody = document.getElementById("sessionstablebody");
+    const sessioncount    = document.getElementById("sessioncount");
+    const chartimg        = document.getElementById("chartimg");
+    const filtersubject   = document.getElementById("filtersubject");
+    const fromdate        = document.getElementById("fromdate");
+    const todate          = document.getElementById("todate");
+    const applyfilters    = document.getElementById("applyfilters");
+    const resetfilters    = document.getElementById("resetfilters");
+    const clearBtn        = document.getElementById("clear");
+    const toast           = document.getElementById("toast");
+
+    let toastTimer;
+    function showToast(msg, type = "success") {
+        toast.textContent = msg;
+        toast.className = "show " + type;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { toast.className = ""; }, 3000);
+    }
+
+    function escapeHTML(s) {
+        return String(s).replace(/[&<>"']/g, m =>
+            ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function chartURL() {
+        const params = new URLSearchParams();
+        if (filtersubject.value.trim()) params.set("subject", filtersubject.value.trim());
+        if (fromdate.value) params.set("from_date", fromdate.value);
+        if (todate.value)   params.set("to_date",   todate.value);
+        params.set("_ts", Date.now());
+        const qs = params.toString();
+        return "/charts/progress.png" + (qs ? "?" + qs : "");
+    }
+
+    async function loadsessions() {
+        try {
             const params = new URLSearchParams();
             if (filtersubject.value.trim()) params.set("subject", filtersubject.value.trim());
             if (fromdate.value) params.set("from_date", fromdate.value);
-            if (todate.value) params.set("to_date", todate.value);
-            params.set("_ts", Date.now());
+            if (todate.value)   params.set("to_date",   todate.value);
             const qs = params.toString();
-            return "/charts/progress.png" + (qs ? "?" + qs : "");
+            const res = await fetch("/sessions" + (qs ? "?" + qs : ""));
+            if (!res.ok) throw new Error("Failed to fetch sessions");
+            const data = await res.json();
+
+            sessionstablebody.innerHTML = "";
+            data.forEach(s => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${escapeHTML(s.subject_id ?? "")}</td>
+                    <td><span class="tag">${escapeHTML(s.subject)}</span></td>
+                    <td>${escapeHTML(s.duration)} min</td>
+                    <td>${new Date(s.start_time).toLocaleString()}</td>`;
+                sessionstablebody.appendChild(tr);
+            });
+
+            sessioncount.textContent = data.length
+                ? `${data.length} session${data.length === 1 ? "" : "s"} found`
+                : "No sessions found.";
+        } catch (err) {
+            console.error(err);
+            sessioncount.textContent = "Error loading sessions.";
+        }
+    }
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const subject  = subjectinput.value.trim();
+        const duration = parseInt(durationinput.value, 10);
+        let start_time = starttimeinput.value;
+
+        if (!subject || !duration || !start_time) {
+            showToast("Please fill in all fields.", "error");
+            return;
         }
 
-        async function loadsessions() {
-            try {
-                const params = new URLSearchParams();
-                if (filtersubject.value.trim()) params.set("subject", filtersubject.value.trim());
-                if (fromdate.value) params.set("from_date", fromdate.value);
-                if (todate.value) params.set("to_date", todate.value);
+        if (start_time.length === 16) start_time += ":00";
 
-                const qs = params.toString();
-                // call /sessions (no extra slash) + querystring
-                const res = await fetch("/sessions" + (qs ? "?" + qs : ""));
-                if (!res.ok) throw new Error("Failed to fetch sessions");
-                const data = await res.json();
-
-                sessionstablebody.innerHTML = "";
-                data.forEach(s => {
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `<td>${escapeHTML(s.subject_id ?? "")}</td>
-                                    <td>${escapeHTML(s.subject)}</td>
-                                    <td>${escapeHTML(s.duration)}</td>
-                                    <td>${new Date(s.start_time).toLocaleString()}</td>`;
-                    sessionstablebody.appendChild(tr);
-                });
-
-                sessioncount.textContent = `${data.length} session(s) found.`;
-            } catch (error) {
-                console.error("Error loading sessions:", error);
-                sessioncount.textContent = "Error loading sessions.";
+        try {
+            const res = await fetch("/sessions/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ subject, duration, start_time }),
+            });
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText || "Failed to add session");
             }
+            showToast("Session added!", "success");
+            form.reset();
+            loadsessions();
+            chartimg.src = chartURL();
+        } catch (err) {
+            console.error(err);
+            showToast("Error adding session.", "error");
         }
+    });
 
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const subject = subjectinput.value.trim();
-            const duration = parseInt(durationinput.value, 10);
-            let start_time = starttimeinput.value;
+    applyfilters.addEventListener("click", () => { loadsessions(); chartimg.src = chartURL(); });
 
-            if (!subject || !duration || !start_time) {
-                alert("Please fill in all fields correctly.");
-                return;
-            }
+    resetfilters.addEventListener("click", () => {
+        filtersubject.value = "";
+        fromdate.value = "";
+        todate.value = "";
+        loadsessions();
+        chartimg.src = chartURL();
+    });
 
-            // datetime-local gives "YYYY-MM-DDTHH:MM" (no seconds); convert to "YYYY-MM-DDTHH:MM:SS"
-            start_time = start_time.length === 16 ? start_time + ":00" : start_time;
+    clearBtn.addEventListener("click", () => form.reset());
 
-            try {
-                const res = await fetch("/sessions/", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ subject, duration, start_time }),
-                });
-                if (!res.ok) {
-                    const errText = await res.text();
-                    throw new Error(errText || "Failed to add session");
-                }
-                alert("Session added successfully!");
-                form.reset();
-                loadsessions();
-                chartimg.src = chartURL();
-            } catch (error) {
-                console.error("Error adding session:", error);
-                alert("Error adding session. See console for details.");
-            }
-        });
-
-        applyfilters.addEventListener("click", () => {
-            loadsessions();
-            chartimg.src = chartURL();
-        });
-
-        resetfilters.addEventListener("click", () => {
-            filtersubject.value = "";
-            fromdate.value = "";
-            todate.value = "";
-            loadsessions();
-            chartimg.src = chartURL();
-        });
-
-        reloadBtn.addEventListener("click", () => {
-            loadsessions();
-            chartimg.src = chartURL();
-        });
-
-        clearBtn.addEventListener("click", () => form.reset());
-
-        // initial load
-        (async () => {
-            await loadsessions();
-            chartimg.src = chartURL();
-        })();
-    </script>
+    (async () => {
+        await loadsessions();
+        chartimg.src = chartURL();
+    })();
+</script>
 </body>
 </html>

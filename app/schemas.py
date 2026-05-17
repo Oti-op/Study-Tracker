@@ -1,9 +1,9 @@
-from pydantic import BaseModel, conint
+from pydantic import BaseModel, Field
 from datetime import datetime
 
 class sessioncreate(BaseModel):
     subject: str
-    duration: conint(gt=0)  # duration must be a positive integer
+    duration: int = Field(gt=0)
     start_time: datetime
 
 class sessionread(BaseModel):
@@ -11,6 +11,5 @@ class sessionread(BaseModel):
     subject: str
     duration: int
     start_time: datetime
-    class Config:
-        orm_mode = True
+    model_config = {"from_attributes": True}
 
